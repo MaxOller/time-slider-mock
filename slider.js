@@ -13,8 +13,30 @@ var startYear;
 var endYear;
 var formatDate = d3.timeFormat("%Y %b");
 var index = 0
-
 var timeData;
+var playButton;
+
+function step() {
+  update();
+  currentValue = index + parseInt(startYear);
+  if (currentValue > parseInt(endYear)-1) {
+    moving = false;
+    currentValue = 0;
+    index = 0
+    clearInterval(timer);
+    // timer = 0;
+    playButton.text("Play");
+    console.log("Slider moving: " + moving);
+  }
+}
+
+function update() {
+  // update position and text of label according to slider scale
+  index += 1;
+
+  drawSlider();
+  drawPlot("Morocco");
+}
 
 // This runs when the page is loaded
 document.addEventListener('DOMContentLoaded', function() {
@@ -31,32 +53,49 @@ document.addEventListener('DOMContentLoaded', function() {
     drawPlot("Morocco");
   })
   setTimeout(() => { drawSlider(); }, 100);
+
+  playButton = d3.select("#play-button");
+  console.log(playButton);
+  playButton.on("click", function() {
+    var button = d3.select(this);
+    if (button.text() == "Pause") {
+      moving = false;
+      clearInterval(timer);
+      // timer = 0;
+      button.text("Play");
+    }
+    else {
+      moving = true;
+      timer = setInterval(step, 200);
+      button.text("Pause");
+    }
+    console.log("Slider moving: " + moving);
+  })
 });
 
 function drawSlider() {
+  d3.select('div#slider-time').selectAll('svg').remove();
   var dataTime = []
 
   timeData.forEach((item, i) => {
     dataTime.push(new Date(item['Year'] + '-01-01T00:00:00'));
   });
 
+  console.log(index);
   var sliderTime = d3.sliderBottom()
     .min(d3.min(dataTime))
     .max(d3.max(dataTime))
     .step(.005)
     .width(1000)
     .tickFormat(d3.timeFormat('%Y'))
-    // .tickValues(dataTime)
-    .default(new Date(parseInt(startYear), 10, 3))
+    .default(new Date(parseInt(startYear)+index, 10, 3))
     .on('onchange', val => {
       d3.select('p#value-time').text(d3.timeFormat('%Y')(val));
       index = (startYear - d3.timeFormat('%Y')(val))*-1;
-      console.log(index);
       drawPlot("Morocco");
     });
 
-  var gTime = d3
-    .select('div#slider-time')
+  var gTime = d3.select('div#slider-time')
     .append('svg')
     .attr('width', (endYear-startYear)*21)
     .attr('height', 100)
@@ -74,6 +113,7 @@ function drawPlot(country) {
   lineSvg.selectAll("g").remove()
   lineSvg.selectAll("path").remove()
   lineSvg.selectAll("text").remove()
+  lineSvg.selectAll("body").remove()
 
   var countryData = timeData.map(x => x[country]);
 
@@ -127,7 +167,7 @@ function drawPlot(country) {
   lineSvg.selectAll("text")
     .style("opacity", "0.8")
     .style("stroke", "Gray");
-  console.log(index);
+
   var focus = lineSvg.append('g')
     .append('circle')
       .attr("transform", "translate(" + margin.left + ", 0)")
@@ -138,16 +178,38 @@ function drawPlot(country) {
       .attr('cy', y(countryData[index]))
       .style('opacity', 1);
 
-  var focusText = d3.select("body")
-    .append("div")
-    .style("opacity", 1)
-    .attr("class", "tooltip")
-    .style("background-color", "white")
-    .style("border", "solid")
-    .style("border-width", "2px")
-    .style("border-radius", "5px")
-    .style("padding", "5px")
-    .style('position','absolute');
+  var focusText = lineSvg.append('g')
+    .append('rect')
+      .attr("transform", "translate(" + margin.left + ", 0)")
+      .style('fill', 'none')
+      .attr('stroke', 'Black')
+      .attr('width', 105)
+      .attr('height', 40)
+      .attr('x', x(new Date(index+1960, 0, 1, 0))-115)
+      .attr('y', y(countryData[index])-15)
+      .style('opacity', 1);
+
+  var text1 = lineSvg.append('text')
+    .attr('x', x(new Date(index+1960, 0, 1, 0))-10)
+    .attr('y', y(countryData[index]))
+    .html("Year: " + (index+1960));
+
+  var text2 = lineSvg.append('text')
+    .attr('x', x(new Date(index+1960, 0, 1, 0))-10)
+    .attr('y', y(countryData[index]) + 17)
+    .html("GDP: " + countryData[index]);
+
+  var focusText = d3.select('div#sideText')
+      .attr('x', x(new Date(index+1960, 0, 1, 0))+15)
+      .attr('y', y(countryData[index]))
+      .html("Year: " + (index+1960) + "<br>" + "GDP: " + countryData[index])
+      .attr("class", "tooltip")
+      .style("background-color", "white")
+      .style("border", "solid")
+      .style("border-width", "2px")
+      .style("border-radius", "5px")
+      .style("padding", "5px")
+      .style('position','absolute');
 
   var line = d3.line()
     .x(function(d, i) { return x(new Date(i+1960, 0, 1, 0)); })
@@ -161,12 +223,12 @@ function drawPlot(country) {
     .attr("stroke-width", 2)
     .attr("d", line);
 
-  lineSvg.append('rect')
-  .attr("transform", "translate(" + margin.left + ", 0)")
-  .style("fill", "none")
-  .style("pointer-events", "all")
-  .attr('width', width)
-  .attr('height', height)
+  // lineSvg.append('rect')
+  // .attr("transform", "translate(" + margin.left + ", 0)")
+  // .style("fill", "none")
+  // .style("pointer-events", "all")
+  // .attr('width', width)
+  // .attr('height', height)
   // .on('mouseover', mouseover)
   // .on('mousemove', mousemove)
   // .on('mouseout', mouseout);
