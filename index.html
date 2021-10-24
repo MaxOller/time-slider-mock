@@ -1,0 +1,29 @@
+﻿﻿
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset='utf-8'>
+    <title>Mock Time-Slider</title>
+    <link rel='stylesheet' href='css/styles.css'>
+    <script src='https://d3js.org/d3.v5.min.js'></script>
+    <script src="https://unpkg.com/d3-simple-slider"></script>
+    <script src='slider.js'></script>
+
+</head>
+<body>
+    <div id='wrapper'>
+        <hr style='width:100%'>
+        <h1>GDP per Capita in Africa (1960-2011)</h1>
+        &nbsp;Year:&nbsp;
+        <input id='year-input' type='number' value='2000' />
+        &nbsp;
+        <br />
+        <svg id='linechart'></svg>
+        <h2>Time</h2>
+        <div class="row align-items-center">
+            <div class="col-sm-2"><p id="value-time"></p></div>
+            <div class="col-sm"><div id="slider-time"></div></div>
+        </div>
+    </div>
+</body>
+</html>

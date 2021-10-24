@@ -1,0 +1,22 @@
+#wrapper {
+  margin:auto;
+  width:1440px;
+}
+input {
+  width:55px;
+}
+svg {
+  margin:5px;
+}
+#linechart {
+  width:800px;
+  height:600px;
+}
+
+html {
+  font-family: 'Trebuchet MS', sans-serif;
+}
+
+text {
+pointer-events: none;
+}
